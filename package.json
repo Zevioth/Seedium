@@ -1,0 +1,12 @@
+{
+  "name": "mozcraft-seed-map",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A Vercel-ready Minecraft Bedrock structure map starter for MozCraft.",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

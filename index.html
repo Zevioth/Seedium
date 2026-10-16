@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101710">
+  <meta name="description" content="MozCraft Seed Map — a Minecraft Bedrock structure explorer for villages, ancient cities, trial chambers and more.">
+  <title>MozCraft Seed Map — Bedrock Explorer</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="MozCraft Seed Map home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 40 40" fill="none">
+            <path d="M5 11 20 3l15 8v18L20 37 5 29V11Z" fill="#88b96c"/>
+            <path d="M5 11 20 19l15-8M20 19v18" stroke="#203522" stroke-width="2"/>
+            <path d="m11 14 9 5 9-5v10l-9 5-9-5V14Z" fill="#d9e9c7"/>
+          </svg>
+        </span>
+        <span class="brand-copy">
+          <strong>MozCraft</strong>
+          <small>SEED MAP</small>
+        </span>
+      </a>
+      <div class="topbar-meta">
+        <span class="edition-pill"><span class="status-dot"></span> BEDROCK / MCPE</span>
+        <a class="github-link" href="https://github.com/" target="_blank" rel="noreferrer" aria-label="GitHub">GitHub <span aria-hidden="true">↗</span></a>
+      </div>
+    </header>
+
+    <main>
+      <section class="intro-row">
+        <div>
+          <p class="eyebrow">WORLD TOOLS / 01</p>
+          <h1>Find your next <span>world.</span></h1>
+          <p class="intro-copy">Explore predicted structures in Minecraft Bedrock worlds. Drop in a seed, scan nearby, and copy the coordinates.</p>
+        </div>
+        <div class="intro-note"><span class="note-icon" aria-hidden="true">⌖</span><span>Built for seeds.<br><b>Made for survival.</b></span></div>
+      </section>
+
+      <section class="workspace" aria-label="Seed map workspace">
+        <aside class="control-panel panel">
+          <div class="panel-heading">
+            <div>
+              <p class="section-kicker">WORLD SETTINGS</p>
+              <h2>Seed &amp; search</h2>
+            </div>
+            <span class="step-number">01</span>
+          </div>
+
+          <form id="scan-form">
+            <label class="field-label" for="seed">World seed</label>
+            <div class="seed-input-wrap">
+              <span class="field-symbol" aria-hidden="true">#</span>
+              <input id="seed" name="seed" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" maxlength="20" value="31415" placeholder="Enter world seed" required>
+              <button class="input-action" id="random-seed" type="button" title="Generate a random seed" aria-label="Generate a random seed">⤨</button>
+            </div>
+            <p class="field-help">Use the seed from your world settings.</p>
+
+            <div class="fields-two">
+              <div>
+                <label class="field-label" for="coord-x">Center X</label>
+                <input id="coord-x" name="x" type="number" step="1" value="0" inputmode="numeric">
+              </div>
+              <div>
+                <label class="field-label" for="coord-z">Center Z</label>
+                <input id="coord-z" name="z" type="number" step="1" value="0" inputmode="numeric">
+              </div>
+            </div>
+
+            <div class="fields-two compact-fields">
+              <div>
+                <label class="field-label" for="radius">Radius <span class="label-unit">chunks</span></label>
+                <input id="radius" name="radius" type="number" min="1" max="1000" step="1" value="100" required>
+              </div>
+              <div>
+                <label class="field-label" for="max-results">Max results</label>
+                <input id="max-results" name="max" type="number" min="1" max="200" step="1" value="50" required>
+              </div>
+            </div>
+
+            <div class="section-divider"></div>
+            <div class="structures-heading">
+              <div>
+                <label class="field-label no-margin">Structures to find</label>
+                <p class="field-help">Choose one or more types.</p>
+              </div>
+              <button type="button" class="text-button" id="toggle-structures">Select all</button>
+            </div>
+            <div class="structure-options" id="structure-options">
+              <!-- Filled from the structure list in app.js. -->
+            </div>
+
+            <button class="primary-button" id="scan-button" type="submit">
+              <span class="button-icon" aria-hidden="true">⌕</span>
+              <span id="scan-button-label">Scan this seed</span>
+              <span class="button-arrow" aria-hidden="true">→</span>
+            </button>
+            <p class="privacy-note"><span aria-hidden="true">◈</span> No account needed. Seed scans go to the structure API.</p>
+          </form>
+        </aside>
+
+        <section class="map-column" aria-label="Structure map and results">
+          <div class="map-panel panel">
+            <div class="map-toolbar">
+              <div class="map-title-group">
+                <span class="map-pin" aria-hidden="true">⌖</span>
+                <div>
+                  <h2>Overworld map</h2>
+                  <p id="map-subtitle">Center: X 0 · Z 0</p>
+                </div>
+              </div>
+              <div class="map-tools">
+                <button type="button" class="icon-button" id="zoom-out" aria-label="Zoom out" title="Zoom out">−</button>
+                <span class="zoom-value" id="zoom-value">100%</span>
+                <button type="button" class="icon-button" id="zoom-in" aria-label="Zoom in" title="Zoom in">+</button>
+                <button type="button" class="icon-button reset-button" id="reset-view" aria-label="Reset map view" title="Reset view">⤢</button>
+              </div>
+            </div>
+
+            <div class="map-stage" id="map-stage">
+              <canvas id="world-map" aria-label="Interactive coordinate map. Drag to pan, scroll or use plus and minus to zoom, and click to inspect coordinates."></canvas>
+              <div class="map-corner-tag"><span class="status-dot"></span> BEDROCK</div>
+              <div class="map-bottom-coords" id="cursor-coords">X — · Z —</div>
+              <div class="map-loading" id="map-loading" hidden>
+                <span class="spinner" aria-hidden="true"></span>
+                <strong>Scanning seed…</strong>
+                <span>Checking supported structure locations</span>
+              </div>
+              <div class="map-empty" id="map-empty">
+                <span class="empty-crosshair" aria-hidden="true">⌖</span>
+                <strong>Your map starts here</strong>
+                <span>Scan a seed to plot structure locations.</span>
+              </div>
+            </div>
+
+            <div class="map-footer">
+              <div class="map-legend" aria-label="Map legend">
+                <span><i class="legend-dot spawn-dot"></i> Center</span>
+                <span><i class="legend-dot village-dot"></i> Village</span>
+                <span><i class="legend-dot rare-dot"></i> Rare structure</span>
+              </div>
+              <button type="button" class="text-button" id="center-map">Center on search</button>
+            </div>
+            <div class="clicked-coordinate" id="clicked-coordinate" hidden>
+              <span>Selected map point: <b id="clicked-coords-text">X 0 · Z 0</b></span>
+              <button type="button" id="use-clicked-coords" class="small-button">Use as center</button>
+            </div>
+          </div>
+
+          <div class="results-panel panel">
+            <div class="results-header">
+              <div>
+                <p class="section-kicker">SCAN OUTPUT</p>
+                <h2>Found structures <span id="result-count" class="count-pill">0</span></h2>
+              </div>
+              <button type="button" class="secondary-button" id="share-link" title="Copy a link with the current seed and settings"><span aria-hidden="true">↗</span> Share setup</button>
+            </div>
+            <div class="results-status" id="results-status" role="status" aria-live="polite">Enter a seed and scan to find nearby structures.</div>
+            <div class="results-list" id="results-list"></div>
+            <div class="results-empty" id="results-empty">
+              <span class="results-empty-icon" aria-hidden="true">⌖</span>
+              <div><strong>No scan results yet</strong><p>Your structure coordinates will appear here.</p></div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section class="notice-row">
+        <span class="notice-symbol" aria-hidden="true">i</span>
+        <p><b>Map status:</b> this version plots structure coordinates on a coordinate grid. It does <b>not</b> generate real terrain or biome colors yet. Structure predictions are provided by an external API and may vary with Minecraft version.</p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>MOZCRAFT <span class="footer-dot">•</span> COMMUNITY WORLD TOOLS</span>
+      <span>Not affiliated with Mojang or Microsoft.</span>
+    </footer>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
